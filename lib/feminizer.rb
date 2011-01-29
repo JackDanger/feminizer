@@ -2,6 +2,10 @@ require 'without_accents'
 require 'nokogiri'
 
 module Feminizer
+
+  VERSION = "1.0.0"
+
+
   extend self
 
   def feminize_html content
