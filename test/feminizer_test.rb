@@ -21,6 +21,17 @@ class FeminizerTest < Test::Unit::TestCase
                    @feminized
     end
   end
+  context "custom forms" do
+    setup {
+      Feminizer.forms = {'boy-a-boy' => 'girly-girla'}
+      @feminized = feminize_text "boy-a-boy is a girl but girly-girla is not."
+      Feminizer.forms = nil
+    }
+    should "turn all girly" do
+      assert_equal "girly-girla is a girl but boy-a-boy is not.",
+                   @feminized
+    end
+  end
   context "feminize" do
     setup {
       @feminized = feminize_html HTML.dup
