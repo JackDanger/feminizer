@@ -14,6 +14,7 @@ module Feminizer
     return string if ['', '\n', "\n"].include?(string.to_s)
 
     string = string.dup.without_accents
+    string = string.gsub(/[\302\240|\s]/, ' ')
 
 
     forms = {
