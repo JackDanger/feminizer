@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'nokogiri'
   s.add_dependency 'activesupport'
-  s.add_dependency 'without_accents'
+  s.add_dependency 'without_accents', '0.9.0'
   s.add_development_dependency 'shoulda'
 
   s.files         = `git ls-files`.split("\n")
