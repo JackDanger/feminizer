@@ -71,7 +71,7 @@ module Feminizer
 
 
     def ok
-     @ok ||= %Q{([\s"':;\.,\>\<\?\!-])}
+     @ok ||= %Q{([\s"':;\.,\>\<\?\!\{\}\(\)-])}
     end
 
     def string_search_replace(string, from, to, mode = nil)
