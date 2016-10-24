@@ -1,4 +1,3 @@
-require 'without_accents'
 require 'nokogiri'
 
 module Feminizer
@@ -25,8 +24,8 @@ module Feminizer
   def feminize_text string
     return string if ['', '\n', "\n"].include?(string.to_s)
 
-    string = string.dup.without_accents
-    string = string.gsub(/\302\240/, ' ')
+    string = string.dup
+    #string = string.gsub(/\302\240/, ' ')
 
     forms.each do |masculine, feminine|
       if string =~ /#{feminine}/i
@@ -71,7 +70,7 @@ module Feminizer
 
 
     def ok
-     @ok ||= %Q{([\s"':;\.,\>\<\?\!\{\}\(\)-])}
+     @ok ||= %Q{([\s"'’:;\.,\>\<\?\!\{\}\(\)-])}
     end
 
     def string_search_replace(string, from, to, mode = nil)
@@ -121,8 +120,8 @@ module Feminizer
         'dude' =>        'lady',
         'dudes' =>       'ladies',
         'he' =>          'she',
-        'his' =>         'her',
         'him' =>         'her',
+        'his' =>         'her',
         'himself' =>     'herself',
         'waitress' =>    'waiter',
         'waitressed' =>  'waited',

@@ -14,10 +14,10 @@ class FeminizerTest < Test::Unit::TestCase
 
   context "feminize_text" do
     setup {
-      @feminized = feminize_text "The Art of Manliness - by a Man’s man, as his hobby, for masculine men everywhere"
+      @feminized = feminize_text "The Art of Manliness - by a Man’s man, as his hobby, to him and for masculine men everywhere"
     }
-    should "turn all girly" do
-      assert_equal "The Art of Womanliness - by a Woman's woman, as her hobby, for feminine women everywhere",
+    should "swap genders of pronouns" do
+      assert_equal "The Art of Womanliness - by a Woman’s woman, as her hobby, to her and for feminine women everywhere",
                    @feminized
     end
   end
@@ -53,8 +53,8 @@ class FeminizerTest < Test::Unit::TestCase
       assert_match %r{This string started with Man in it and should turn into Woman}, @feminized
     end
     should "feminize even if a period is following the word" do
-      assert_match %r{would be the cowgirl.},
-                   feminize_html(open("http://artofmanliness.com/2010/09/07/3-archetypes-of-american-manliness-part-ii-the-heroic-artisan/", {'User-Agent' => 'Firefox'}).read)
+      assert_match %r{as the cowgirl.},
+                   feminize_html(File.read("./test/fixture.html"))
     end
   end
 
