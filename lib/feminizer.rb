@@ -2,7 +2,7 @@ require 'nokogiri'
 
 module Feminizer
 
-  VERSION = "1.0.5"
+  VERSION = "1.0.7"
 
 
   extend self
