@@ -2,9 +2,96 @@ require 'active_support'
 require File.expand_path File.join(File.dirname(__FILE__), '..', 'lib', 'feminizer')
 
 describe Feminizer do
+  # Set the term pairs ('forms') for Feminizer, if any are specified
+  around do |example|
+    described_class.forms = forms if defined?(forms)
+    example.run
+    described_class.forms = Feminizer.send(:default_forms)
+  end
+
+  describe '.form_trie' do
+    subject(:form_trie) { described_class.form_trie }
+
+    let(:forms) do
+      {
+        'given' => 'taken',
+        'Start' => 'End',
+        'givenmore' => 'overlap',
+      }
+    end
+
+    it 'prepares a trie that allows looking up all forms, in both directions' do
+      expect(subject).to eq({
+        'g' => {
+          'i' => {
+            'v' => {
+              'e' => {
+                'n' => {
+                  terminal: 'taken',
+                  'm' => {
+                    'o' => {
+                      'r' => {
+                        'e' => {
+                          terminal: 'overlap',
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+        },
+        't' => {
+          'a' => {
+            'k' => {
+              'e' => {
+                'n' => {
+                  terminal: 'given'
+                }
+              }
+            }
+          }
+        },
+        'E' => {
+          'n' => {
+            'd' => {
+              terminal: 'Start',
+            }
+          }
+        },
+        'S' => {
+          't' => {
+            'a' => {
+              'r' => {
+                't' => {
+                  :terminal => 'End',
+                }
+              }
+            }
+          }
+        },
+        'o' => {
+          'v' => {
+            'e' => {
+              'r' => {
+                'l' => {
+                  'a' => {
+                    'p' => {
+                      terminal: 'givenmore',
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      })
+    end
+  end
 
   describe '.feminize_text' do
-    subject(:feminize_text) { Feminizer.feminize_text text }
+    subject(:feminize_text) { described_class.feminize_text text }
 
     let(:text) { "The Art of Manliness - by a Man’s man, as his hobby, to him and for masculine men everywhere" }
 
@@ -33,12 +120,6 @@ describe Feminizer do
 
       let(:forms) { {'buhboy' => 'guhgirl'} }
 
-      around do |example|
-        Feminizer.forms = forms
-        example.run
-        Feminizer.forms = nil
-      end
-
       it 'swaps the custom forms in both directions' do
         subject.should eq('buhboy is a made-up feminine term but guhgirl is masculine.')
       end
@@ -46,7 +127,7 @@ describe Feminizer do
   end
 
   context '.feminize_html' do
-    subject(:feminize_html) { Feminizer.feminize_html html }
+    subject(:feminize_html) { described_class.feminize_html html }
 
     let(:html) { HTML.dup }
 
