@@ -1,65 +1,82 @@
-require 'test/unit'
 require 'active_support'
-require 'open-uri'
 require File.expand_path File.join(File.dirname(__FILE__), '..', 'lib', 'feminizer')
-require 'shoulda'
 
-class FeminizerTest < Test::Unit::TestCase
-  def feminize_text *args
-    Feminizer.feminize_text *args
-  end
-  def feminize_html *args
-    Feminizer.feminize_html *args
-  end
+describe Feminizer do
 
-  context "feminize_text" do
-    setup {
-      @feminized = feminize_text "The Art of Manliness - by a Man’s man, as his hobby, to him and for masculine men everywhere"
-    }
-    should "swap genders of pronouns" do
-      assert_equal "The Art of Womanliness - by a Woman’s woman, as her hobby, to her and for feminine women everywhere",
-                   @feminized
+  describe '.feminize_text' do
+    subject(:feminize_text) { Feminizer.feminize_text text }
+
+    let(:text) { "The Art of Manliness - by a Man’s man, as his hobby, to him and for masculine men everywhere" }
+
+    it "swaps genders of pronouns" do
+      subject.should eq("The Art of Womanliness - by a Woman’s woman, as her hobby, to her and for feminine women everywhere")
     end
-  end
-  context "custom forms" do
-    setup {
-      Feminizer.forms = {'boy-a-boy' => 'girly-girla'}
-      @feminized = feminize_text "boy-a-boy is a girl but girly-girla is not."
-      Feminizer.forms = nil
-    }
-    should "turn all girly" do
-      assert_equal "girly-girla is a girl but boy-a-boy is not.",
-                   @feminized
+
+    context 'in a small string' do
+      let(:text) { 'This string started with Woman in it and should turn into Man' }
+
+      it 'swaps genders' do
+        subject.should == 'This string started with Man in it and should turn into Woman'
+      end
     end
-  end
-  context "feminize" do
-    setup {
-      @feminized = feminize_html HTML.dup
-    }
-    should "have remote url in original" do
-      assert_match %r{<li><a href="http://artofmanliness.com/man-knowledge">Man Knowledge</a></li>}, HTML
+
+    context 'between parentheses' do
+      let(:text) { "This string started (with Woman) in it and should turn into (Man now)" }
+
+      it 'swaps genders' do
+        subject.should include('This string started (with Man) in it and should turn into (Woman now)')
+      end
     end
-    should "replace link content with feminized text and relative path" do
-      assert_match %r{<li><a href="/man-knowledge">Woman Knowledge</a></li>}, @feminized
-    end
-    should "replace link content when it's next to an image" do
-      assert_match %r{How to Apologize Like a Woman}, @feminized
-    end
-    should "swap genders in small string" do
-      assert_match %r{This string started with Man in it and should turn into Woman},
-                  feminize_html("This string started with Woman in it and should turn into Man")
-    end
-    should "swap genders in full document" do
-      assert_match %r{This string started with Man in it and should turn into Woman}, @feminized
-    end
-    should "feminize even if a period is following the word" do
-      assert_match %r{as the cowgirl.},
-                   feminize_html(File.read("./test/fixture.html"))
+
+    context "with custom forms" do
+      let(:text) { "guhgirl is a made-up feminine term but buhboy is masculine." }
+
+      let(:forms) { {'buhboy' => 'guhgirl'} }
+
+      around do |example|
+        Feminizer.forms = forms
+        example.run
+        Feminizer.forms = nil
+      end
+
+      it 'swaps the custom forms in both directions' do
+        subject.should eq('buhboy is a made-up feminine term but guhgirl is masculine.')
+      end
     end
   end
 
+  context '.feminize_html' do
+    subject(:feminize_html) { Feminizer.feminize_html html }
 
-  HTML = <<-EOHTML
+    let(:html) { HTML.dup }
+
+    it "has remote url in original" do
+      expect(html).to match(%r{<li><a href="http://artofmanliness.com/man-knowledge">Man Knowledge</a></li>})
+    end
+
+    it 'swaps genders in full document' do
+      subject.should =~ %r{This string started with Man in it and should turn into Woman}
+    end
+
+    it 'replaces link content with feminized text and relative path' do
+      subject.should =~ %r{<li><a href="/man-knowledge">Woman Knowledge</a></li>}
+    end
+
+    it 'replaces link content when link content is next to an image' do
+      subject.should =~ %r{How to Apologize Like a Woman}
+    end
+
+    context 'if a period is following the word' do
+      let(:html) { File.read(File.expand_path('fixture.html', __dir__)) }
+
+      it 'feminizes even if a period is following the word' do
+        subject.should =~ %r{as the cowgirl.}
+      end
+    end
+  end
+end
+
+HTML = <<-EOHTML
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:og="http://opengraphprotocol.org/schema/" xmlns:fb="http://www.facebook.com/2008/fbml" dir="ltr" lang="en-US"> 
 <head profile="http://gmpg.org/xfn/11"> 
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
@@ -158,5 +175,3 @@ s1.parentNode.insertBefore(s, s1);
 </body>
 </html>
 EOHTML
-
-end
